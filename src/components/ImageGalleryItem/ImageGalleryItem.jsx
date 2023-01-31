@@ -1,24 +1,42 @@
-import propTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import Modal from 'components/Modal';
+import { Img, Wrapper } from './ImageGalleryItem.styled'
 
 class ImageGalleryItem extends Component {
+  static propTypes = {
+    item: PropTypes.shape({
+      webformatURL: PropTypes.string.isRequired,
+      tags: PropTypes.string.isRequired,
+      largeImageURL: PropTypes.string.isRequired,
+    }),
+  };
   state = {
     showModal: false,
   };
 
-  static propTypes = {
-    src: propTypes.string.isRequired,
-    alt: propTypes.string.isRequired,
-    largeImageUrl: propTypes.string.isRequired,
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+    }));
   };
 
   render() {
-    const { src, alt } = this.props;
-
+    const {
+      item: { webformatURL, tags, largeImageURL },
+    } = this.props;
+    const { showModal } = this.state;
     return (
-      <li>
-        <img src={src} alt={alt} />
-      </li>
+      <>
+        <Wrapper onClick={this.toggleModal}>
+          <Img src={webformatURL} alt={tags} />
+        </Wrapper>
+        {showModal && (
+          <Modal onClose={this.toggleModal}>
+            <img src={largeImageURL} alt="tag" />
+          </Modal>
+        )}
+      </>
     );
   }
 }

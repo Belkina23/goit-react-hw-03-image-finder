@@ -1,17 +1,19 @@
 import { Component } from 'react';
-// import { api } from 'API';
+import { Container } from './App.styled';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
+import Button from './Button';
+import Loader from './Loader';
 
 class App extends Component {
   state = {
     search: '',
     items: [],
-    loading: false,
+    isLoading: false,
     error: null,
     bigImage: '',
     page: 1,
@@ -45,10 +47,10 @@ class App extends Component {
             }));
             return;
           }
-          toast('За вашим запитом нічого не знайдено', { autoClose: 3000 });
+          toast('По Вашему запросу ничего не найдено', { autoClose: 3000 });
         })
         .catch(({ message }) => {
-          message = toast('Щось пішло не так, спробуйте ще раз');
+          message = toast('Что-то пошло не так, попробуйте еще раз');
           this.setState({
             error: message,
           });
@@ -71,16 +73,21 @@ class App extends Component {
 
 
   render() {
-    const { items } = this.state;
-    const { searchImage } = this;
+    const { items, isLoading } = this.state;
+    const { searchImage, handleClick } = this;
 
     return (
-      <>
+      <Container>
         <Searchbar onSubmit={searchImage} />
+        {isLoading && <Loader />}
         <ImageGallery items={items} />
 
+        {items.length > 0 && items.length % 12 <= 0 && (
+          <Button onClick={handleClick} />
+        )}
+
         <ToastContainer />
-      </>
+      </Container>
     );
   }
 }

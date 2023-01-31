@@ -1,56 +1,56 @@
 import { Component } from 'react';
+import {
+  Form,
+  Header,
+  SearchBtn,
+  Label,
+  Input,
+  SearchIcon,
+} from './Searchbar.styled';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import PropTypes from 'prop-types';
 
 class Searchbar extends Component {
-  state = {
-    search: "",
-  };
-
   static propTypes = {
     onSubmit: PropTypes.func.isRequired,
   };
 
-  handleChange = ({ target }) => {
-    const { name, value } = target;
-    this.setState({ [name]: value });
+  state = {
+    searchName: '',
   };
 
+  handleChange = e => {
+    this.setState({ searchName: e.currentTarget.value.toLocaleLowerCase() });
+  };
   handleSubmit = e => {
     e.preventDefault();
-    const { onSubmit } = this.props;
-    onSubmit(this.state.search);
-    this.reset();
+    if (this.state.searchName.trim() === '') {
+      toast.warn('Введіть ваш запит', {});
+
+      return;
+    }
+    this.props.onSubmit(this.state.searchName);
+    this.setState({ searchName: '' });
   };
 
-  reset() {
-    this.setState({
-      search: "",
-    });
-  }
-
   render() {
-    const { handleChange, handleSubmit } = this;
-    const { search } = this.state;
-
     return (
-      <header>
-        <form onSubmit={handleSubmit}>
-          <button type="submit">
-            <span>Search</span>
-          </button>
+      <Header>
+        <Form onSubmit={this.handleSubmit}>
+          <SearchBtn type="submit">
+            <SearchIcon /> <Label></Label>
+          </SearchBtn>
+          <ToastContainer />
 
-          <input
-            onChange={handleChange}
-            name="search"
-            value={search}
+          <Input
+            onChange={this.handleChange}
             type="text"
-            autoComplete="off"
-            autoFocus
-            required
+            autocomplete="off"
             placeholder="Search images and photos"
           />
-        </form>
-      </header>
+        </Form>
+      </Header>
     );
   }
 }
