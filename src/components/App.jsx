@@ -1,5 +1,9 @@
 import { Component } from 'react';
-import { api } from 'API';
+// import { api } from 'API';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
 
@@ -10,53 +14,72 @@ class App extends Component {
     loading: false,
     error: null,
     bigImage: '',
-    page: api.pageToFetch,
+    page: 1,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { search, page } = this.state;
-    if (prevState.search !== search || prevState.page !== page) {
-      this.fetchImages();
+    if (
+      prevState.searchName !== this.state.searchName ||
+      prevState.page !== this.state.page
+    ) {
+      this.setState({ isLoading: true });
+
+      axios({
+        url: `https://pixabay.com/api/?`,
+        params: {
+          q: this.state.searchName,
+          page: this.state.page,
+          key: '31947460-94dfdb2440a2031458268e436',
+          image_type: 'photo',
+          orientation: 'horizontal',
+          per_page: 12,
+        },
+      })
+        .then(response => {
+          return response.data.hits;
+        })
+        .then(data => {
+          if (data.length > 0) {
+            this.setState(prevState => ({
+              items: [...prevState.items, ...data],
+            }));
+            return;
+          }
+          toast('За вашим запитом нічого не знайдено', { autoClose: 3000 });
+        })
+        .catch(({ message }) => {
+          message = toast('Щось пішло не так, спробуйте ще раз');
+          this.setState({
+            error: message,
+          });
+        })
+        .finally(() => {
+          this.setState({ isLoading: false });
+        });
     }
   }
 
-  searchImage = ({ search }) => {
-    const searchResoult = search !== api.searchToFetch;
-    if (!searchResoult) return;
-    api.searchToFetch = search;
-    api.pageToFetch = 1;
-    this.setState({ items: [] });
-  
+  searchImage = searchName => {
+    this.setState({ searchName: searchName, page: 1, items: [] });
   };
 
-  async fetchImages() {
-    try {
-      this.setState({ loading: true });
-
-      const {
-        data: { hits, totalHits },
-      } = await api.fetch();
-
-      this.setState(({ items }) => ({
-        items: [...items, ...hits],
-        totalHits: totalHits,
-      }));
-    } catch (error) {
-      this.setState({ error: error.message });
-    } finally {
-      this.setState({ loading: false });
-    }
-  }
+  handleClick = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
+  };
 
 
   render() {
-    const { items, loading, error } = this.state;
+    const { items } = this.state;
     const { searchImage } = this;
 
     return (
       <>
         <Searchbar onSubmit={searchImage} />
         <ImageGallery items={items} />
+
+        <ToastContainer />
       </>
     );
   }
