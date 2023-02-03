@@ -79,8 +79,13 @@ class App extends Component {
     return (
       <Container>
         <Searchbar onSubmit={searchImage} />
+        
+        {items.length > 0 && (
+              <ImageGallery items={items} />
+        )}
+    
+
         {isLoading && <Loader />}
-        <ImageGallery items={items} />
 
         {items.length > 0 && items.length % 12 <= 0 && (
           <Button onClick={handleClick} />
